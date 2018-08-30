@@ -18,7 +18,7 @@ double DwivediSampling::calculateonelr()
 	auto const wz = sampledirdis(v0);
 	auto const theta = acos(-wz);
 
-
+	auto const bla = 0.0;
 	if (theta >= mcss::pi<double>() / 2)
 	{
 		return 0.0;
