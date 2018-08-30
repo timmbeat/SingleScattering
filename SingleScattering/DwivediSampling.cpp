@@ -59,7 +59,7 @@ int main()
 	ClassicalSampling cla(1.0, 1.0, 0.99, 100, 0.005);
 	auto sumdwi = 0.0;
 	auto sumclas = 0.0;
-	auto runs = 1000;
+	auto runs = 100000;
 	for(auto i = 0; i < runs; i++)
 	{
 
