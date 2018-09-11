@@ -19,10 +19,21 @@
 	\begin{semilogyaxis}[width=0.95\linewidth, height=5cm, xmin=0, xmax=100,
 			xlabel={$r$},
 			ylabel={$\log\left(R_d\left(r\right)\right)$}]
+		\addplot[red] table[skip first n=0,mark=none,x index=2,y index=1]{./Manyplots.csv};
+		\addplot[green] table[skip first n=0,mark=none,x index=2,y index=0]{./Manyplots.csv};
+	\end{semilogyaxis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+	\begin{semilogyaxis}[width=0.95\linewidth, height=5cm, xmin=0, xmax=100,
+			xlabel={$r$},
+			ylabel={$\log\left(R_d\left(r\right)\right)$}]
 		\addplot[red] table[skip first n=0,mark=none,x index=2,y index=1]{./plotfile.csv};
 		\addplot[green] table[skip first n=0,mark=none,x index=2,y index=0]{./plotfile.csv};
 	\end{semilogyaxis}
 \end{tikzpicture}
+
+
 
 $\Delta w = \frac{w\mu_a}{\mu_t}$
 

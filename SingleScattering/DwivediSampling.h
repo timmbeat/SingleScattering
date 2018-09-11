@@ -27,7 +27,7 @@ class DwivediSampling
 		return (1 - wz / v0)*mut*exp(-(1 - wz / v0)*mut*t);
 	}
 
-	double calculateonelr();
+	double calculateonelr(size_t runs);
 
 	double getv0()
 	{

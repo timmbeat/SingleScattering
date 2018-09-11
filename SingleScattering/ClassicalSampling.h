@@ -21,7 +21,7 @@ class ClassicalSampling
 		return -log(random()) / (absorption + scattering);
 	}
 
-	double calculatelr();
+	double calculatelr(size_t runs);
 
 
 	decltype(auto) getbinsr() const

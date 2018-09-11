@@ -11,7 +11,7 @@ ClassicalSampling::ClassicalSampling(float absorption, float scattering, float a
 
 ClassicalSampling::~ClassicalSampling() = default;
 
-double ClassicalSampling::calculatelr()
+double ClassicalSampling::calculatelr(size_t runs)
 {
 	
 		double const costheta = sdirectionaldistribution();
@@ -24,17 +24,17 @@ double ClassicalSampling::calculatelr()
 
 		double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
 		double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		double const pdfp = Sampling::henvey_greenstein_norm(acos(costheta), anisotropy);
-		double const pdi_r = Sampling::henvey_greenstein(acos(costheta), anisotropy);
+		double const pdfp = Sampling::henyey_greenstein_norm(acos(costheta), anisotropy);
+		double const pdi_r = Sampling::henyey_greenstein(acos(costheta), anisotropy);
 		double const pdft = Sampling::taudi_r(di, absorption, scattering);
 
 		double const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
 
-		auto binnumber = static_cast<size_t>((di / tan(acos(costheta))/delr));
+		auto binnumber = static_cast<size_t>((di * tan(acos(costheta))/delr));
 
 		if (binnumber > binsr - 1) binnumber = binsr - 1;
 		
-		bins[binnumber] += lr;
+		bins[binnumber] += lr/runs;
 
 		return lr;
 

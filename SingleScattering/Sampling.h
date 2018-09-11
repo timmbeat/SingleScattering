@@ -26,12 +26,12 @@ class Sampling
 	{
 		return (absorption + scattering)*exp(-(absorption + scattering)*li);
 	}
-	static double henvey_greenstein(double const theta, double const g)
+	static double henyey_greenstein(double const theta, double const g)
 	{
 		return (1 - g * g) / (4 * pi<double>()*pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
 	}
 
-	static double henvey_greenstein_norm(double const theta, double const g)
+	static double henyey_greenstein_norm(double const theta, double const g)
 	{
 		return (1 - g * g) / (2 * pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
 	}

@@ -125,6 +125,9 @@
     <ClCompile Include="DwivediSampling.cpp" />
     <ClCompile Include="Sampling.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Manyplots.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
