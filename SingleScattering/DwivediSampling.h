@@ -3,7 +3,7 @@
 class DwivediSampling
 {
 	public:
-	DwivediSampling(float const absorption, float const scattering, float const anisotropy, float size, float const delr);
+	DwivediSampling(double const absorption, double const scattering, double const anisotropy, float size, float const delr);
 	~DwivediSampling();
 
 
@@ -52,9 +52,9 @@ class DwivediSampling
 	double const v0;
 	float const binsr;
 	float const delr;
-	float const absorption;
-	float const scattering;
-	float const anisotropy;
+	double const absorption;
+	double const scattering;
+	double const anisotropy;
 	std::vector<double> bins;
 
 };

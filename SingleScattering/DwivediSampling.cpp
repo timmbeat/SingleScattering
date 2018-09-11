@@ -6,7 +6,7 @@
 #include "ClassicalSampling.h"
 
 
-DwivediSampling::DwivediSampling(float const absorption, float const scattering, float const anisotropy, float size, float const delr) :
+DwivediSampling::DwivediSampling(double const absorption, double const scattering, double const anisotropy, float size, float const delr) :
 	absorption(absorption), scattering(scattering), anisotropy(anisotropy), binsr(size/delr), delr(delr), v0(mcss::v0(scattering / (absorption + scattering)))
 {
 	bins.resize(binsr);
@@ -23,26 +23,25 @@ double DwivediSampling::calculateonelr(size_t const runs)
 		return 0.0;
 	}
 
-		
 		auto const di = samplepathdis(-1.0, v0, absorption + scattering);
 		auto const r = -di * tan(theta);
-		double const li = Sampling::li(r, di);
+		auto const li = Sampling::li(r, di);
 
 		//double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
-		double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
+		auto const tdi_r = Sampling::taudi_r(li, absorption, scattering);
 
 		//double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		double const pdi_r = Sampling::henyey_greenstein(theta, anisotropy);
+		auto const to_di = Sampling::tauo_di(di, absorption, scattering);
+		auto const pdi_r = Sampling::henyey_greenstein(theta, anisotropy);
 
 		auto const pdfp = dirdis(v0, wz);
-		auto const pdft = pathdis(v0, wz, absorption + scattering, di);   
+		auto const pdft = pathdis(v0, -1.0, absorption + scattering, di);   
 
 
-		auto binnumber = static_cast<size_t>(r/ delr);
+		auto binnumber = static_cast<size_t>(r / delr);
 
 		if (binnumber > binsr - 1) binnumber = binsr - 1;
-		double const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
+		auto const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
 		bins[binnumber] += lr/runs;
 
 		return lr/runs;
