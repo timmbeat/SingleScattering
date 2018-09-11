@@ -13,7 +13,7 @@ Sampling::~Sampling()
 {
 }
 
-void Sampling::createPlotFile(const std::vector<double>  * binsA, const std::vector<double> * binsB, std::string filename)
+void Sampling::createPlotFile(const std::vector<double>  * binsA, const std::vector<double> * binsB, const float delr, std::string filename)
 {
 
 	
@@ -28,7 +28,7 @@ void Sampling::createPlotFile(const std::vector<double>  * binsA, const std::vec
 
 		for (size_t i = 0; i < binsA->size(); i++)
 		{
-			csvout << std::setw(15) << std::left << (*binsA)[i] << std::setw(15) << std::left << (*binsB)[i] << " " << i;
+			csvout << std::setw(15) << std::left << (*binsA)[i] << std::setw(15) << std::left << (*binsB)[i] << " " << i * delr;
 			ccout << csvout.str() << std::endl;
 			csvout.str("");
 		}

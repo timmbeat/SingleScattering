@@ -47,7 +47,7 @@ class Sampling
 	}
 
 
-	static void createPlotFile(const std::vector<double> *  binsA, const std::vector<double> * binsB, std::string filename);
+	static void createPlotFile(const std::vector<double> *  binsA, const std::vector<double> * binsB, const float delr,  std::string filename);
 
 
 	

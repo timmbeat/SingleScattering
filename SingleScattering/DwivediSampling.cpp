@@ -6,10 +6,8 @@
 #include "ClassicalSampling.h"
 
 
-double td_ir(double mu_t, double li, double wz, double v0);
-double to_di(double mu_t, double di, double wz, double v0, double absorption);
-DwivediSampling::DwivediSampling(float const absorption, float const scattering, float const anisotropy, int const binsr, float const delr) :
-	absorption(absorption), scattering(scattering), anisotropy(anisotropy), binsr(binsr), delr(delr), v0(mcss::v0(scattering / (absorption + scattering)))
+DwivediSampling::DwivediSampling(float const absorption, float const scattering, float const anisotropy, float size, float const delr) :
+	absorption(absorption), scattering(scattering), anisotropy(anisotropy), binsr(size/delr), delr(delr), v0(mcss::v0(scattering / (absorption + scattering)))
 {
 	bins.resize(binsr);
 }
@@ -18,9 +16,9 @@ double DwivediSampling::calculateonelr(size_t const runs)
 {
 
 	auto const wz = sampledirdis(v0);
-	auto const theta = acos(-wz);
+	auto const theta = mcss::pi<double>() - acos(-wz);
 
-	if (theta >= mcss::pi<double>() / 2)
+	if (theta <= mcss::pi<double>() / 2)
 	{
 		return 0.0;
 	}
@@ -41,13 +39,13 @@ double DwivediSampling::calculateonelr(size_t const runs)
 		auto const pdft = pathdis(v0, wz, absorption + scattering, di);   
 
 
-		auto binnumber = static_cast<size_t>(di*tan(acos(-wz)) / delr);
+		auto binnumber = static_cast<size_t>(r/ delr);
 
 		if (binnumber > binsr - 1) binnumber = binsr - 1;
 		double const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
 		bins[binnumber] += lr/runs;
 
-		return lr;
+		return lr/runs;
 
 
 
@@ -55,15 +53,6 @@ double DwivediSampling::calculateonelr(size_t const runs)
 }
 
 
-double td_ir(double mu_t, double li, double wz, double v0)
-{
-	return (1 - wz / v0)*mu_t*exp(-(1 - wz / v0)*mu_t*li);
-}
-
-double to_di(double mu_t, double di, double wz, double v0, double absorption)
-{
-	return (1 - wz / v0)*mu_t*exp(-(1 - wz / v0)*mu_t*di)*(1 - absorption * di);
-}
 int main()
 {
 
@@ -78,11 +67,11 @@ int main()
 
 	for (auto i = 0; i < 100; i++)
 	{
-		DwivediSampling dwi(1.0, 1.0, 0.99, 100, 0.005);
-		ClassicalSampling cla(1.0, 1.0, 0.99, 100, 0.005);
+		DwivediSampling dwi(1.0, 1.0, 0.99, 1.0, 0.005);
+		ClassicalSampling cla(1.0, 1.0, 0.99, 1.0, 0.005);
 		auto sumdwi = 0.0;
 		auto sumclas = 0.0;
-		auto runs = 100000;
+		auto runs = 1000000;
 
 		for (auto j = 0; j < runs; j++)
 		{
@@ -90,10 +79,15 @@ int main()
 			sumdwi += dwi.calculateonelr(runs);
 			sumclas += cla.calculatelr(runs);
 		}
+
+		std::cout << sumdwi << std::endl;
+		std::cout << sumclas << std::endl;
+		std::cout << i << std::endl;
 		csvout << std::setw(15) << std::left << sumdwi/runs << std::setw(15) << std::left << sumclas/runs << i;
 		ccout << csvout.str() << std::endl;
 		csvout.str("");
-		Sampling::createPlotFile(dwi.getBins(), cla.getbin(), "./plot/plotfile.csv");
+		
+		Sampling::createPlotFile(dwi.getBins(), cla.getbin(), dwi.getDelr(),  "./plot/plotfile.csv");
 
 	}
 

@@ -4,7 +4,7 @@
 class ClassicalSampling
 {
 	public:
-	ClassicalSampling(float absorption, float scattering, float anisotropy, size_t binsr, float delr);
+	ClassicalSampling(float absorption, float scattering, float anisotropy, float size, float delr);
 	~ClassicalSampling();
 
 	double sdirectionaldistribution()

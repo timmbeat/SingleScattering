@@ -3,7 +3,7 @@
 class DwivediSampling
 {
 	public:
-	DwivediSampling(float const absorption, float const scattering, float const anisotropy, int const binsr, float const delr);
+	DwivediSampling(float const absorption, float const scattering, float const anisotropy, float size, float const delr);
 	~DwivediSampling();
 
 
@@ -41,6 +41,11 @@ class DwivediSampling
 	decltype(auto) getBins() const 
 	{
 		return &bins;
+	}
+
+	decltype(auto) getDelr()const
+	{
+		return delr;
 	}
 	
 	private:
