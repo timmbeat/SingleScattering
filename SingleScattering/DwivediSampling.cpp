@@ -31,11 +31,10 @@ double DwivediSampling::calculateonelr(size_t const runs)
 		double const li = Sampling::li(r, di);
 
 		//double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
-		double const tdi_r = td_ir(absorption + scattering, li, wz, v0);
+		double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
 
 		//double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		double const to_di = ::to_di(absorption + scattering, di, wz, v0, absorption);
-
+		double const to_di = Sampling::tauo_di(di, absorption, scattering);
 		double const pdi_r = Sampling::henyey_greenstein(theta, anisotropy);
 
 		auto const pdfp = dirdis(v0, wz);
@@ -69,7 +68,7 @@ int main()
 {
 
 
-	std::ofstream ccout("./Manyplots.csv", std::ofstream::trunc);
+	std::ofstream ccout("./plot/Manyplots.csv", std::ofstream::trunc);
 
 	std::stringstream csvout;
 	csvout << std::setw(15) << std::left << "DWIVEDI" << std::setw(15) << std::left << "CLASSICAL " << " RUN";
@@ -91,7 +90,7 @@ int main()
 			sumdwi += dwi.calculateonelr(runs);
 			sumclas += cla.calculatelr(runs);
 		}
-		csvout << std::setw(15) << std::left << sumdwi << std::setw(15) << std::left << sumclas << i;
+		csvout << std::setw(15) << std::left << sumdwi/runs << std::setw(15) << std::left << sumclas/runs << i;
 		ccout << csvout.str() << std::endl;
 		csvout.str("");
 		Sampling::createPlotFile(dwi.getBins(), cla.getbin(), "./plot/plotfile.csv");
