@@ -69,7 +69,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Tim\Documents\OpenGL\Includes\glm;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Tim\Documents\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -117,11 +120,13 @@
   <ItemGroup>
     <ClInclude Include="ClassicalSampling.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="DDwivediSampling.h" />
     <ClInclude Include="DwivediSampling.h" />
     <ClInclude Include="Sampling.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClassicalSampling.cpp" />
+    <ClCompile Include="DDwivediSampling.cpp" />
     <ClCompile Include="DwivediSampling.cpp" />
     <ClCompile Include="Sampling.cpp" />
   </ItemGroup>

@@ -1,48 +1,20 @@
+/*
+* Created by Tim Mend on 12.09.2018
+*/
+
+
 #pragma once
 #include "constants.h"
 #include "Sampling.h"
-class ClassicalSampling
+class ClassicalSampling : public Sampling
 {
 	public:
-	ClassicalSampling(float absorption, float scattering, float anisotropy, float size, float delr);
+	ClassicalSampling(Real absorption, Real scattering, Real anisotropy, double diameter, double delr, std::size_t runs);
 	~ClassicalSampling();
 
-	double sdirectionaldistribution()
-	{
-		if (anisotropy == 0) return 2 * random() - 1;
-		auto const qani = anisotropy * anisotropy;
 
-		return (1 / (2 * anisotropy)) * (1 + qani - pow(((1 - qani) / (1 - anisotropy + 2 * anisotropy*random())), 2));
-
-	}
-
-	double spathdistribution()
-	{
-		return -log(random()) / (absorption + scattering);
-	}
-
-	double calculatelr(size_t runs);
-
-
-	decltype(auto) getbinsr() const
-	{
-		return binsr;
-	}
-	/*
-	 * Returns a reference to the bin
-	 */
-	decltype(auto) getbin() const
-	{
-		return &bins;
-	}
-
-private:
-float absorption;
-float scattering;
-float anisotropy;
-int binsr;
-float delr;
-std::vector<double> bins;
-
+	Real samplePathDistribution() const;
+	Real sampleDirDistribution() const;
+	Real calculateLr() override;
 };
 

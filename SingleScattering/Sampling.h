@@ -1,3 +1,8 @@
+/*
+* Created by Tim Mend on 12.09.2018
+*/
+
+
 #pragma once
 #include <cmath>
 #include <random>
@@ -11,45 +16,44 @@ using namespace mcss;
 class Sampling
 {
 	public:
-	Sampling();
-	~Sampling();
+	Sampling(Real absorption, Real scattering, Real anisotropy, double diameter, double delr, std::size_t runs);
+	virtual ~Sampling();
 
 
 
-
-	static double tauo_di(double const di, double const absorption, double const scattering) 
-	{
-		return (absorption + scattering)*exp(-(absorption + scattering)*di)*(1 - absorption * di);
-	}
-
-	static double taudi_r(double const li, double const absorption, double const scattering)
-	{
-		return (absorption + scattering)*exp(-(absorption + scattering)*li);
-	}
-	static double henyey_greenstein(double const theta, double const g)
-	{
-		return (1 - g * g) / (4 * pi<double>()*pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
-	}
-
-	static double henyey_greenstein_norm(double const theta, double const g)
-	{
-		return (1 - g * g) / (2 * pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
-	}
-
-	static double lr(double const taudi_r, double const pdi_r, double const tauo_di, double const pdfp, double const pdftau)
-	{
-		return taudi_r * (pdi_r / pdfp)*(tauo_di / pdftau);
-	}
-
-	static double li(double r, double di)
-	{
-		return sqrt(di*di + r * r);
-	}
+public:
+//Function which are needed by both Sampling Method
+Real tauo_di(Real const di, Real const absorption, Real const scattering);
+Real taudi_r(Real const li, Real const absorption, Real const scattering);
+Real henyey_greenstein(Real const theta, Real const g);
+Real henyey_greenstein_norm(Real const theta, Real const g);
+Real lr(Real const taudi_r, Real const pdi_r, Real const tauo_di, Real const pdfp, Real const pdftau);
+Real li(Real r, Real di);
+static void createPlotFile(const std::vector<Real> *  binsA, const std::vector<Real> * binsB, const float delr,  std::string filename);
+virtual Real calculateLr() = 0;
 
 
-	static void createPlotFile(const std::vector<double> *  binsA, const std::vector<double> * binsB, const float delr,  std::string filename);
+//Getter
+std::size_t Binsr()	const;
+Real Absorption()	const;
+Real Scattering()	const;
+Real Anisotropy()	const;
+float Delr()		const;
+std::vector<Real> *  Bins();
+float Diameter()	const;
+std::size_t Runs()	const;
+Real MU_T() const;
 
-
+private:
+Real absorption;
+Real scattering;
+Real anisotropy;
+Real mu_t;
+std::size_t binsr;
+std::size_t runs;
+float diameter;
+float delr;
+std::vector<Real> bins;
 	
 };
 

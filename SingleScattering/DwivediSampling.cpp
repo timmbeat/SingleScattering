@@ -6,48 +6,79 @@
 #include "ClassicalSampling.h"
 
 
-DwivediSampling::DwivediSampling(double const absorption, double const scattering, double const anisotropy, float size, float const delr) :
-	absorption(absorption), scattering(scattering), anisotropy(anisotropy), binsr(size/delr), delr(delr), v0(mcss::v0(scattering / (absorption + scattering)))
+DwivediSampling::DwivediSampling(Real absorption, Real scattering, Real anisotropy, double diameter, double delr, std::size_t runs) :
+	Sampling{absorption, scattering, anisotropy, diameter, delr, runs}, v0(mcss::v0(scattering/(absorption+scattering)))
 {
-	bins.resize(binsr);
+}
+DwivediSampling::~DwivediSampling() = default;
+
+
+
+Real DwivediSampling::dirdis(Real const wz) const
+{
+		return (1 / log((v0 + 1) / (v0 - 1))) * (1 / (v0 - wz));
 }
 
-double DwivediSampling::calculateonelr(size_t const runs)
+Real DwivediSampling::pathdis(Real const wz, Real const t) const
+{
+		return (1 - wz / v0)*MU_T()*exp(-(1 - wz / v0)*MU_T()*t);	
+}
+
+Real DwivediSampling::V0() const
+{
+	return v0;
+}
+
+Real DwivediSampling::samplePathDistribution(Real wz) const
+{
+	return (-log(random())) / ((1 - v0 / wz)*(MU_T()));
+}
+
+Real DwivediSampling::sampleDirDistribution() const
+{
+	return v0 - (v0 + 1)*pow((v0 - 1) / (v0 + 1), random());
+}
+
+
+
+
+
+Real DwivediSampling::calculateLr()
 {
 
-	auto const wz = sampledirdis(v0);
-	auto const theta = mcss::pi<double>() - acos(-wz);
+	auto const wz = sampleDirDistribution();
+	auto const theta = acos(-wz);
 
-	if (theta <= mcss::pi<double>() / 2)
+	auto const di = samplePathDistribution(-1.0);
+	auto const r = -di * tan(theta);
+
+	if (r <= 0)
 	{
 		return 0.0;
 	}
 
-		auto const di = samplepathdis(-1.0, v0, absorption + scattering);
-		auto const r = -di * tan(theta);
-		auto const li = Sampling::li(r, di);
-
-		//double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
-		auto const tdi_r = Sampling::taudi_r(li, absorption, scattering);
-
-		//double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		auto const to_di = Sampling::tauo_di(di, absorption, scattering);
-		auto const pdi_r = Sampling::henyey_greenstein(theta, anisotropy);
-
-		auto const pdfp = dirdis(v0, wz);
-		auto const pdft = pathdis(v0, -1.0, absorption + scattering, di);   
 
 
-		auto binnumber = static_cast<size_t>(r / delr);
+	auto const li = Sampling::li(r, di);
 
-		if (binnumber > binsr - 1) binnumber = binsr - 1;
-		auto const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
-		bins[binnumber] += lr/runs;
+	//double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
+	auto const tdi_r = Sampling::taudi_r(li, Absorption(), Scattering());
 
-		return lr/runs;
+	//double const to_di = Sampling::tauo_di(di, absorption, scattering);
+	auto const to_di = Sampling::tauo_di(di, Absorption(), Scattering());
+	auto const pdi_r = Sampling::henyey_greenstein(theta, Anisotropy());
+
+	auto const pdfp = dirdis(wz);
+	auto const pdft = pathdis(-1.0, di);
 
 
+	auto binnumber = static_cast<size_t>(r / Delr());
 
+	if (binnumber > Binsr() - 1) binnumber = Binsr() - 1;
+	auto const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
+	(*Bins())[binnumber] += lr / Runs();
+
+	return lr / Runs();
 
 }
 
@@ -63,20 +94,23 @@ int main()
 	ccout << csvout.str() << std::endl;
 	csvout.str("");
 
+	std::size_t runs = 100000;
+	Real const absorption = 1.0;
+	Real const scattering = 1.0;
+	Real const anisotropy = 0.99;
 
-	for (auto i = 0; i < 100; i++)
+	for (auto i = 0; i < 1000; i++)
 	{
-		DwivediSampling dwi(1.0, 1.0, 0.99, 1.0, 0.005);
-		ClassicalSampling cla(1.0, 1.0, 0.99, 1.0, 0.005);
+		DwivediSampling dwivedi{ absorption, scattering, anisotropy, 1.0, 0.005, runs };
+		ClassicalSampling classical{ absorption, scattering, anisotropy, 1.0, 0.005, runs };
 		auto sumdwi = 0.0;
 		auto sumclas = 0.0;
-		auto runs = 1000000;
-
+		
 		for (auto j = 0; j < runs; j++)
 		{
 
-			sumdwi += dwi.calculateonelr(runs);
-			sumclas += cla.calculatelr(runs);
+			sumdwi += dwivedi.calculateLr();
+			sumclas += classical.calculateLr();
 		}
 
 		std::cout << sumdwi << std::endl;
@@ -86,11 +120,10 @@ int main()
 		ccout << csvout.str() << std::endl;
 		csvout.str("");
 		
-		Sampling::createPlotFile(dwi.getBins(), cla.getbin(), dwi.getDelr(),  "./plot/plotfile.csv");
+		Sampling::createPlotFile(dwivedi.Bins(), classical.Bins(), dwivedi.Delr(),  "./plot/plotfile.csv");
 
 	}
 
 
 	
 }
-DwivediSampling::~DwivediSampling() = default;

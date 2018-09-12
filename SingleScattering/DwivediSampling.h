@@ -1,61 +1,32 @@
+/*
+ * Created by Tim Mend on 12.09.2018
+ */
+
+
+
 #pragma once
 #include "Sampling.h"
-class DwivediSampling
+class DwivediSampling : public Sampling
 {
 	public:
-	DwivediSampling(double const absorption, double const scattering, double const anisotropy, float size, float const delr);
+	DwivediSampling(Real absorption, Real scattering, Real anisotropy, double diameter, double delr, std::size_t runs);
 	~DwivediSampling();
 
 
-	double sampledirdis(double const v0) const 
-	{
-		return v0 - (v0 + 1)*pow((v0 - 1) / (v0 + 1), random());
-	}
-
-	double samplepathdis(double const wz, double const v0, double const mut) const
-	{
-		return (-log(random())) / ((1 - v0 / wz)*mut);
-	}
-
-	double dirdis(double const v0, double const wz) const 
-	{
-		return (1 / log((v0 + 1) / (v0 - 1))) * (1 / (v0 - wz));
-	}
-
-	double pathdis(double const v0, double const wz, double const mut, double const t) const
-	{
-		return (1 - wz / v0)*mut*exp(-(1 - wz / v0)*mut*t);
-	}
-
-	double calculateonelr(size_t runs);
-
-	double getv0()
-	{
-		return v0;
-	}
+	//Sampling Specific functions
+	Real dirdis(Real const wz) const;
+	Real pathdis(Real const wz, Real const t) const;
+	Real samplePathDistribution(Real wz) const;
+	Real sampleDirDistribution() const;
+	Real calculateLr() override;
 
 
-	/*
-	 * Returns a reference to the Bins
-	 */
-	decltype(auto) getBins() const 
-	{
-		return &bins;
-	}
-
-	decltype(auto) getDelr()const
-	{
-		return delr;
-	}
 	
+	//Getter
+	Real V0() const;
+
 	private:
-	double const v0;
-	float const binsr;
-	float const delr;
-	double const absorption;
-	double const scattering;
-	double const anisotropy;
-	std::vector<double> bins;
+	Real const v0;
 
 };
 

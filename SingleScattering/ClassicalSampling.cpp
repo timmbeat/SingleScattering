@@ -2,43 +2,56 @@
 
 
 
-ClassicalSampling::ClassicalSampling(float absorption, float scattering, float anisotropy, float size, float delr)
-	: absorption(absorption), scattering(scattering), anisotropy(anisotropy), binsr(size/delr), delr(delr)
+ClassicalSampling::ClassicalSampling(Real const absorption, Real const scattering, Real const anisotropy, double const diameter, double const delr, std::size_t const runs)
+	: Sampling{ absorption, scattering, anisotropy, diameter, delr, runs }
 {
-	bins.resize(binsr);
 }
 
 
 ClassicalSampling::~ClassicalSampling() = default;
 
-double ClassicalSampling::calculatelr(size_t runs)
+
+Real ClassicalSampling::samplePathDistribution() const
 {
-	
-		double const costheta = sdirectionaldistribution();
-		auto const theta = acos(costheta);
-		if (theta <= mcss::pi<double>() / 2)
-		{
-			return 0.0;
-		}
-		double const di = spathdistribution();
-		auto const r = -di * tan(theta);
-		
-		double const li = Sampling::li(r, di);
+	return -log(random()) / (Absorption() + Scattering());
+}
 
-		double const tdi_r = Sampling::taudi_r(li, absorption, scattering);
-		double const to_di = Sampling::tauo_di(di, absorption, scattering);
-		double const pdfp = Sampling::henyey_greenstein_norm(theta, anisotropy);
-		double const pdi_r = Sampling::henyey_greenstein(theta, anisotropy);
-		double const pdft = Sampling::taudi_r(di, absorption, scattering);
+Real ClassicalSampling::sampleDirDistribution() const 
+{
+	if (Anisotropy() == 0) return 2 * random() - 1;
+	auto const qani = Anisotropy() * Anisotropy();
 
-		double const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
+	return (1 / (2 * Anisotropy())) * (1 + qani - pow(((1 - qani) / (1 - Anisotropy() + 2 * Anisotropy()*random())), 2));
+}
 
-		auto binnumber = static_cast<size_t>(r / delr);
+Real ClassicalSampling::calculateLr()
+{
 
-		if (binnumber > binsr - 1) binnumber = binsr - 1;
-		
-		bins[binnumber] += lr/runs;
+	auto const costheta = sampleDirDistribution();
+	auto const theta = acos(costheta);
 
-		return lr/runs;
+	auto const di = samplePathDistribution();
+	auto const r = -di * tan(theta);
 
+
+	if (r <= 0)
+	{
+		return 0.0;
+	}
+
+	auto const li = Sampling::li(r, di);
+	auto const tdi_r = Sampling::taudi_r(li, Absorption(), Scattering());
+	auto const to_di = Sampling::tauo_di(di, Absorption(), Scattering());
+	auto const pdfp = Sampling::henyey_greenstein_norm(theta, Anisotropy());
+	auto const pdi_r = Sampling::henyey_greenstein(theta, Anisotropy());
+	auto const pdft = Sampling::taudi_r(di, Absorption(), Scattering());
+	auto const lr = Sampling::lr(tdi_r, pdi_r, to_di, pdfp, pdft);
+
+	auto binnumber = static_cast<size_t>(r / Delr());
+
+	if (binnumber > Binsr() - 1) binnumber = Binsr() - 1;
+
+	(*Bins())[binnumber] += lr / Runs();
+
+	return lr / Runs();
 }

@@ -27,6 +27,9 @@
     <ClInclude Include="ClassicalSampling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DDwivediSampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sampling.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ClassicalSampling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DDwivediSampling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
