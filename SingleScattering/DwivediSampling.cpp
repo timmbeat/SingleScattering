@@ -5,6 +5,7 @@
 #include <sstream>
 #include "ClassicalSampling.h"
 #include "DDwivediSampling.h"
+#include "DClassicalSampling.h"
 
 
 DwivediSampling::DwivediSampling(double absorption, double scattering, double anisotropy, double diameter, double delr, std::size_t runs) :
@@ -84,10 +85,10 @@ double DwivediSampling::calculateLr()
 }
 
 
-int main()
+int main()  
 {
 
-	std::size_t runs = 100000;
+	std::size_t runs = 1000000;
 	double const absorption = 1.0;
 	double const scattering = 1.0;
 	double const anisotropy = 0.99;
@@ -98,23 +99,26 @@ int main()
 	csvout << std::setw(15) << std::left << "DWIVEDI" << std::setw(15) << std::left << "CLASSICAL " << " RUN";
 	ccout << csvout.str() << std::endl;
 	csvout.str("");
-	for (auto j = 0; j < 100; j++)
+	for (auto j = 0; j < 5; j++)
 	{
 
 		std::cout << "RUN " << j << std::endl;
-		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, -1.0, 0.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs };
-
-
+		
+									//Position						Direction												  diameter delr runs wz    scattering events	Enforce scattering
+		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, -1.0, 2, true };
+		DClassicalSampling dclassicl{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, 2, true };
 		auto sum = 0.0;
+		auto sum_clas = 0.0;
 		for (auto i = 0; i < runs; i++)
 		{
-			sum += ddwivedi.calculateLr();
+			sum += ddwivedi.run();
+			sum_clas += dclassicl.run();
 		}
+		
+		std::cout << sum << "||||||||||CLASSICAL >>>>>" << sum_clas << std::endl;
+		Sampling::createPlotFile(ddwivedi.Bins(), dclassicl.Bins(), 0.005, "./plot/ddwivedi.csv");
 
-		std::cout << sum;
-		Sampling::createPlotFile(ddwivedi.Bins(), ddwivedi.Bins(), 0.005, "./plot/ddwivedi.csv");
-
-		csvout << std::setw(15) << std::left << sum << std::setw(15) << std::left << sum << j;
+		csvout << std::setw(15) << std::left << sum << std::setw(15) << std::left << sum_clas << j;
 		ccout << csvout.str() << std::endl;
 		csvout.str("");
 	}

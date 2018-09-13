@@ -3,8 +3,9 @@
 
 
 DDwivediSampling::DDwivediSampling(glm::dvec3 position, glm::dvec3 direction, double absorption, double scattering,
-								   double anisotropy, double diameter, double delr, std::size_t runs) :
-	position(position), direction(direction), DwivediSampling{absorption, scattering, anisotropy, diameter, delr, runs}
+								   double anisotropy, double diameter, double delr, std::size_t runs, double wz, int times, bool forcescattering) :
+	position(position), direction(direction), wz(wz), wz_old(wz), Lr(1.0), Lr_org(1.0), wz_org(wz), position_org(position), direction_org(direction), times(times), forcescattering(forcescattering), scatterevent(0),
+	DwivediSampling{ absorption, scattering, anisotropy, diameter, delr, runs }
 {
 }
 
@@ -12,111 +13,131 @@ DDwivediSampling::~DDwivediSampling()
 {
 }
 
-void DDwivediSampling::updateDirection(double wz)
+void DDwivediSampling::updateDirection()
 {
 
-	//auto const theta = acos(-wz);
-	auto const y = 2 * mcss::pi<double>() * random();
-	//auto const sint = sqrt(1 - wz * wz);
 	auto const sint = sqrt(1 - wz * wz);
-	auto const cosp = cos(y);
-	double sinp;
 	auto const uz = direction.z;
-	if (y < mcss::pi<double>())
-	{
-		sinp = sqrt(1.0 - cosp * cosp);
-	}
-	else
-	{
-		sinp = -sqrt(1.0 - cosp * cosp);
-	}
-
-
-	direction.x = sint * sinp;
-	direction.y = wz;
+	direction.x = sint;
+	direction.y = 0.0;
+	direction.z = glm::sign(uz) * wz;
 }
 
 
 void DDwivediSampling::updatePosition(double stepsize)
 {
 	position.x = position.x + direction.x*stepsize;
-	position.y = position.y + direction.y*stepsize;
-	//position.z = position.z + direction.z*stepsize;
+	position.y = 0.0;
+	position.z = position.z + direction.z*stepsize;
 }
 
 double DDwivediSampling::calculateLr()
 {
-	double Lr = 1.0;
+
+	double const s1 = samplePathDistribution(wz_old);
+	
+	//Check if Boundary is hit.
+	if (boundary(s1))
+	{
+		return Lr;
+	}
 
 
-	//SCHRITT 1
 	double const wz1 = sampleDirDistribution();
-	double const s1 = samplePathDistribution(-1.0);
+	wz = wz1; //Set new wz;
 	updatePosition(s1);
 	auto direction_old = direction;
-	updateDirection(wz1);
+	updateDirection();
+	scatterevent++;
 	auto direction_new = direction;
 	double dot = glm::dot(direction_new, direction_old);
 	double dot_theta = dot / (glm::length(direction_old) * glm::length(direction_new));
 
+	auto dot_norm = glm::dot(direction_new, glm::dvec3(0.0, 0.0, 1.0)) / (glm::length(direction_old)*glm::length(glm::dvec3(0.0, 0.0, 1.0)));
 
-	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering())/DwivediSampling::pathdis(-1.0, s1))*(henyey_greenstein(acos(dot_theta), Anisotropy())/dirdis(wz1));
-		
 
-	//SCHRITT 2
-	double const s2 = samplePathDistribution(wz1);
-	//Check if Boundary is hit
-	if (-position.y / direction.y <= s2)
+	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering())/DwivediSampling::pathdis(wz_old, s1))*(henyey_greenstein(acos(dot_theta), Anisotropy())/dirdis(wz));
+}
+
+
+void DDwivediSampling::out()
+{
+	if (direction.z <= 0.0)
+
 	{
-		double const teiler = static_cast<double>(Runs());
-		Lr *= taudi_r(abs(-position.y / direction.y), Absorption(), Scattering());
-		double const Lr_sized = Lr / teiler;
-		updatePosition(-position.y / direction.y);
-
-		auto binnumber = static_cast<size_t>(abs(position.x) / Delr());
-		if(binnumber >= Binsr()) binnumber = Binsr() - 1;
-		
-
-		(*Bins())[binnumber] += Lr_sized;
-		return Lr_sized;
-
+		Lr = 0.0;
 	}
-	updatePosition(s2);
-	double const wz2 = sampleDirDistribution();
-	direction_old = direction;
-	updateDirection(wz2);
-	direction_new = direction;
-	dot = glm::dot(direction_old, direction_new);
-	dot_theta = dot / (glm::length(direction_old) * glm::length(direction_new));
-
-	
-	
-	
-
-	Lr *= (Sampling::tauo_di(s2, Absorption(), Scattering()) / DwivediSampling::pathdis(wz1, s2))*(henyey_greenstein(acos(dot_theta), Anisotropy()) / dirdis(wz2));
+	else
+	{
 
 
-	
+		auto const stepleft = -position.z / direction.z;
 
-	if (direction.y < 0) return 0.0;
-
-	double const rest = -position.y / direction.y;
+		updatePosition(stepleft);
 
 
-	updatePosition(rest);
+		Lr *= taudi_r(abs(stepleft), Absorption(), Scattering());
 
-	Lr *= taudi_r(abs(rest), Absorption(), Scattering());
-	auto test = abs(position.x) / Delr();
-	auto binnumber = static_cast<size_t>(abs(position.x) / Delr());
-	if (binnumber >= Binsr()) binnumber = Binsr() - 1;
-
-	double const teiler = static_cast<double>(Runs());
-	double const Lr_sized = Lr / teiler;
-	(*Bins())[binnumber] += Lr_sized;
+		auto binnum = static_cast<size_t>(abs(position.x) / Delr());
+		if (binnum >= Binsr()) binnum = Binsr() - 1;
 
 
-	return Lr_sized;
+		auto const Lr_sized = static_cast<double>(Lr / Runs());
 
+		(*Bins())[binnum] += Lr_sized;
+	}
+}
+
+bool DDwivediSampling::boundary(double stepsize)
+{
+	if (-position.z / direction.z <= stepsize && direction.z > 0.0)
+	{
+		if(scatterevent < times && forcescattering)
+		{
+			Lr = 0.0;
+			return true;
+		}
+		else
+		{
+
+
+			Lr *= taudi_r(abs(-position.z / direction.z), Absorption(), Scattering());
+			double const Lr_sized = static_cast<double>(Lr / Runs());
+			updatePosition(-position.z / direction.z);
+
+			auto binnumber = static_cast<size_t>(abs(position.x) / Delr());
+			if (binnumber >= Binsr()) binnumber = Binsr() - 1;
+
+
+			(*Bins())[binnumber] += Lr_sized;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+double DDwivediSampling::run()
+{
+	reset();
+	for(auto i = 0; i < times; i++)
+	{
+		calculateLr();
+	}
+
+
+	out();
+
+	return Lr/Runs();
+}
+
+void DDwivediSampling::reset()
+{
+	Lr = Lr_org;
+	position = position_org;
+	direction = direction_org;
+	wz = wz_org;
+	scatterevent = 0;
 }
 
 glm::dvec3 DDwivediSampling::Position() const

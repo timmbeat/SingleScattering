@@ -30,6 +30,9 @@ namespace mcss
 		auto const alph = alpha > 0.9999 ? 0.9999 : alpha;
 		return alph > 0.56 ? static_cast<Real>(1.0/k0high<Real>(alph)) : static_cast<Real>(1.0/k0low<Real>(alph));
 	}
-
+	template<typename Real> constexpr Real cos1()
+	{
+		return static_cast<Real>(0.999999999);
+	}
 
 }
