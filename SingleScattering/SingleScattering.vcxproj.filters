@@ -49,5 +49,6 @@
     <None Include="Manyplots.csv">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="plot\ddwivedi.csv" />
   </ItemGroup>
 </Project>

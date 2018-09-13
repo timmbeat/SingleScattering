@@ -19,12 +19,12 @@
 	\begin{semilogyaxis}[width=0.95\linewidth, height=5cm, xmin=0, xmax=1.0,
 			xlabel={$r$},
 			ylabel={$\log\left(R_d\left(r\right)\right)$}]
-		\addplot[red] table[skip first n=0,mark=none,x index=2,y index=1]{./plotfile.csv};
-		\addplot[green] table[skip first n=0,mark=none,x index=2,y index=0]{./plotfile.csv};
+		\addplot[red] table[skip first n=0,mark=none,x index=2,y index=1]{./ddwivedi.csv};
+		\addplot[green] table[skip first n=0,mark=none,x index=2,y index=0]{./ddwivedi.csv};
 	\end{semilogyaxis}
 \end{tikzpicture}
 \begin{tikzpicture}
-	\begin{semilogyaxis}[width=0.95\linewidth, height=5cm, xmin=0, xmax=1000,
+	\begin{semilogyaxis}[width=0.95\linewidth, height=5cm, xmin=0, xmax=100,
 			xlabel={$r$},
 			ylabel={$\log\left(R_d\left(r\right)\right)$}]
 		\addplot[red] table[skip first n=0,mark=none,x index=2,y index=1]{./Manyplots.csv};

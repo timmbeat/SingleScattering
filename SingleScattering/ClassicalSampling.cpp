@@ -2,7 +2,7 @@
 
 
 
-ClassicalSampling::ClassicalSampling(Real const absorption, Real const scattering, Real const anisotropy, double const diameter, double const delr, std::size_t const runs)
+ClassicalSampling::ClassicalSampling(double const absorption, double const scattering, double const anisotropy, double const diameter, double const delr, std::size_t const runs)
 	: Sampling{ absorption, scattering, anisotropy, diameter, delr, runs }
 {
 }
@@ -11,12 +11,12 @@ ClassicalSampling::ClassicalSampling(Real const absorption, Real const scatterin
 ClassicalSampling::~ClassicalSampling() = default;
 
 
-Real ClassicalSampling::samplePathDistribution() const
+double ClassicalSampling::samplePathDistribution() const
 {
 	return -log(random()) / (Absorption() + Scattering());
 }
 
-Real ClassicalSampling::sampleDirDistribution() const 
+double ClassicalSampling::sampleDirDistribution() const
 {
 	if (Anisotropy() == 0) return 2 * random() - 1;
 	auto const qani = Anisotropy() * Anisotropy();
@@ -24,7 +24,7 @@ Real ClassicalSampling::sampleDirDistribution() const
 	return (1 / (2 * Anisotropy())) * (1 + qani - pow(((1 - qani) / (1 - Anisotropy() + 2 * Anisotropy()*random())), 2));
 }
 
-Real ClassicalSampling::calculateLr()
+double ClassicalSampling::calculateLr()
 {
 
 	auto const costheta = sampleDirDistribution();

@@ -9,12 +9,12 @@
 class ClassicalSampling : public Sampling
 {
 	public:
-	ClassicalSampling(Real absorption, Real scattering, Real anisotropy, double diameter, double delr, std::size_t runs);
+	ClassicalSampling(double absorption, double scattering, double anisotropy, double diameter, double delr, std::size_t runs);
 	~ClassicalSampling();
 
 
-	Real samplePathDistribution() const;
-	Real sampleDirDistribution() const;
-	Real calculateLr() override;
+	double samplePathDistribution() const;
+	double sampleDirDistribution() const;
+	double calculateLr() override;
 };
 
