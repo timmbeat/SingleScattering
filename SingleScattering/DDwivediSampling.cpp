@@ -32,7 +32,7 @@ void DDwivediSampling::updateDirection(double wz)
 	}
 
 
-	direction.x = sint * cosp;
+	direction.x = sint * sinp;
 	direction.y = wz;
 }
 
@@ -65,7 +65,6 @@ double DDwivediSampling::calculateLr()
 
 	//SCHRITT 2
 	double const s2 = samplePathDistribution(wz1);
-
 	//Check if Boundary is hit
 	if (-position.y / direction.y <= s2)
 	{

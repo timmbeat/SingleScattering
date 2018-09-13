@@ -102,7 +102,7 @@ int main()
 	{
 
 		std::cout << "RUN " << j << std::endl;
-		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs };
+		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, -1.0, 0.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs };
 
 
 		auto sum = 0.0;
