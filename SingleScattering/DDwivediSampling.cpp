@@ -33,9 +33,16 @@ void DDwivediSampling::updatePosition(double stepsize)
 
 double DDwivediSampling::calculateLr()
 {
+	if (scatterevent == times)
+	{
+		dead = true;
+		return Lr;
+	}
+
 
 	double const s1 = samplePathDistribution(wz_old);
-	
+
+
 	//Check if Boundary is hit.
 	if (boundary(s1))
 	{
@@ -43,25 +50,40 @@ double DDwivediSampling::calculateLr()
 	}
 
 
-	double const wz1 = sampleDirDistribution();
+	double wz1 = sampleDirDistribution();
 	wz = wz1; //Set new wz;
 	updatePosition(s1);
 	auto direction_old = direction;
 	updateDirection();
 	scatterevent++;
 	auto direction_new = direction;
-	double dot = glm::dot(direction_new, direction_old);
-	double dot_theta = dot / (glm::length(direction_old) * glm::length(direction_new));
+	auto dot = glm::dot(direction_new, direction_old);
+	auto dot_theta = dot / (glm::length(direction_old) * glm::length(direction_new));
+	auto dot_norm = glm::dot(direction_new, glm::dvec3(0.0, 0.0, 1.0)) / (glm::length(direction_new)*glm::length(glm::dvec3(0.0, 0.0, 1.0)));
 
-	auto dot_norm = glm::dot(direction_new, glm::dvec3(0.0, 0.0, 1.0)) / (glm::length(direction_old)*glm::length(glm::dvec3(0.0, 0.0, 1.0)));
+	auto cos_theta = dot_theta < 0.0 ? - 1 - dot_theta : 1 - dot_theta;
+	if (dot_theta == 0.0)
+	{
+		if(direction.z < 0.0)
+		{
+			cos_theta = -1.0;
+		}
+		else
+		{
+			cos_theta = 1.0;
+		}
+	}
+	auto tmp = (henyey_greenstein_norm(cos_theta, Anisotropy()) / dirdis(wz));
+	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering()) / DwivediSampling::pathdis(wz_old, s1))*tmp;
 
-
-	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering())/DwivediSampling::pathdis(wz_old, s1))*(henyey_greenstein(acos(dot_theta), Anisotropy())/dirdis(wz));
+	wz_old = wz;
 }
+
 
 
 void DDwivediSampling::out()
 {
+	dead = true;
 	if (direction.z <= 0.0)
 
 	{
@@ -92,6 +114,7 @@ bool DDwivediSampling::boundary(double stepsize)
 {
 	if (-position.z / direction.z <= stepsize && direction.z > 0.0)
 	{
+		dead = true;
 		if(scatterevent < times && forcescattering)
 		{
 			Lr = 0.0;
@@ -99,7 +122,6 @@ bool DDwivediSampling::boundary(double stepsize)
 		}
 		else
 		{
-
 
 			Lr *= taudi_r(abs(-position.z / direction.z), Absorption(), Scattering());
 			double const Lr_sized = static_cast<double>(Lr / Runs());
@@ -120,11 +142,11 @@ bool DDwivediSampling::boundary(double stepsize)
 double DDwivediSampling::run()
 {
 	reset();
-	for(auto i = 0; i < times; i++)
+
+	while(!dead)
 	{
 		calculateLr();
 	}
-
 
 	out();
 
@@ -137,7 +159,18 @@ void DDwivediSampling::reset()
 	position = position_org;
 	direction = direction_org;
 	wz = wz_org;
+	wz_old = wz_org;
 	scatterevent = 0;
+	dead = false;
+}
+
+double DDwivediSampling::sampleDirDistribution_hen() const
+{
+
+	if (Anisotropy() == 0) return 2 * random() - 1;
+	auto const qani = Anisotropy() * Anisotropy();
+
+	return (1 / (2 * Anisotropy())) * (1 + qani - pow(((1 - qani) / (1 - Anisotropy() + 2 * Anisotropy()*random())), 2));
 }
 
 glm::dvec3 DDwivediSampling::Position() const

@@ -17,6 +17,11 @@ DClassicalSampling::~DClassicalSampling()
 double DClassicalSampling::calculateLr()
 {
 	//SCHRITT 1
+	if (scatterevent == times)
+	{
+		dead = true;
+		return Lr;
+	}
 	double const s1 = samplePathDistribution();
 
 	//Check if Boundary is hit.
@@ -25,12 +30,11 @@ double DClassicalSampling::calculateLr()
 		return Lr;
 	}
 
-
 	auto const cos_theta = ClassicalSampling::sampleDirDistribution();
 	updatePosition(s1);
 	updateDirection(cos_theta);
 	scatterevent++;
-	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering()) / taudi_r(s1, Absorption(), Scattering()))*(henyey_greenstein(acos(cos_theta), Anisotropy()) / henyey_greenstein_norm(acos(cos_theta), Anisotropy()));
+	Lr *= (Sampling::tauo_di(s1, Absorption(), Scattering()) / taudi_r(s1, Absorption(), Scattering()));
 }
 
 void DClassicalSampling::reset()
@@ -43,7 +47,6 @@ void DClassicalSampling::reset()
 void DClassicalSampling::updateDirection(double const cos_theta)
 {
 	auto const sint = sqrt(1 - cos_theta * cos_theta);
-
 
 	auto const uz = direction.z;
 	auto const ux = direction.x;
@@ -72,6 +75,7 @@ void DClassicalSampling::updatePosition(double const stepsize)
 
 void DClassicalSampling::out()
 {
+	dead = true;
 	if (direction.z <= 0.0)
 
 	{
@@ -102,6 +106,7 @@ bool DClassicalSampling::boundary(double const stepsize)
 {
 	if (-position.z / direction.z <= stepsize && direction.z > 0.0)
 	{
+		dead = true;
 		if (scatterevent < times && forcescattering)
 		{
 			Lr = 0.0;
@@ -126,13 +131,19 @@ bool DClassicalSampling::boundary(double const stepsize)
 
 double DClassicalSampling::run()
 {
-	reset();
-	for (auto i = 0; i < times; i++)
-	{
-		calculateLr();
-	}
+	DClassicalSampling::reset();
 
-	out();
+	while(!dead)
+	{
+		DClassicalSampling::calculateLr();
+		std::cout << "?????";
+	}
+	//for (auto i = 0; i < times; i++)
+	//{
+	//	calculateLr();
+	//}
+
+	DClassicalSampling::out();
 
 	return Lr / Runs();
 }

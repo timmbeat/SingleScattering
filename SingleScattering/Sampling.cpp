@@ -35,9 +35,9 @@ double Sampling::henyey_greenstein(double const theta, double const g)
 	return (1 - g * g) / (4 * pi<double>()*pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
 }
 
-double Sampling::henyey_greenstein_norm(double const theta, double const g)
+double Sampling::henyey_greenstein_norm(double const cos_theta, double const g)
 {
-	return (1 - g * g) / (2 * pow(1 + g * g - 2 * g*cos(theta), 3.0 / 2.0));
+	return (1 - g * g) / (2 * pow(1 + g * g - 2 * g* cos_theta, 3.0 / 2.0));
 }
 
 double Sampling::lr(double const taudi_r, double const pdi_r, double const tauo_di, double const pdfp, double const pdftau)

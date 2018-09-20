@@ -26,7 +26,7 @@ public:
 double tauo_di(double const di, double const absorption, double const scattering);
 double taudi_r(double const li, double const absorption, double const scattering);
 double henyey_greenstein(double const theta, double const g);
-double henyey_greenstein_norm(double const theta, double const g);
+double henyey_greenstein_norm(double const cos_theta, double const g);
 double lr(double const taudi_r, double const pdi_r, double const tauo_di, double const pdfp, double const pdftau);
 double li(double r, double di);
 static void createPlotFile(const std::vector<double> *  binsA, const std::vector<double> * binsB, const float delr,  std::string filename);

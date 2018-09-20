@@ -29,6 +29,6 @@ glm::dvec3 direction_org;
 int times;
 bool forcescattering;
 int scatterevent;
-
+bool dead;
 };
 

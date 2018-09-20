@@ -20,7 +20,7 @@ class DDwivediSampling :
 	bool boundary(double stepsize);
 	double run();
 	void reset();
-
+	double sampleDirDistribution_hen() const;
 
 	glm::dvec3 Position() const;
 	glm::dvec3 Direction() const;
@@ -43,5 +43,6 @@ double Lr_org;
 int times;
 bool forcescattering;
 int scatterevent;
+bool dead;
 };
 

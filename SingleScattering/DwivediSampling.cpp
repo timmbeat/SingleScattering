@@ -33,14 +33,13 @@ double DwivediSampling::V0() const
 
 double DwivediSampling::samplePathDistribution(double wz) const
 {
-	return static_cast<double>(-log(random()) / ((1 - v0 / wz)*MU_T()));
+	return -log(random()) / ((1 - wz / v0)*MU_T());
 }
 
 double DwivediSampling::sampleDirDistribution() const
 {
 	return v0 - (v0 + 1)*pow((v0 - 1) / (v0 + 1), random());
 }
-
 
 
 
@@ -99,14 +98,14 @@ int main()
 	csvout << std::setw(15) << std::left << "DWIVEDI" << std::setw(15) << std::left << "CLASSICAL " << " RUN";
 	ccout << csvout.str() << std::endl;
 	csvout.str("");
-	for (auto j = 0; j < 5; j++)
+	for (auto j = 0; j < 100; j++)
 	{
 
 		std::cout << "RUN " << j << std::endl;
 		
 									//Position						Direction												  diameter delr runs wz    scattering events	Enforce scattering
-		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, -1.0, 2, true };
-		DClassicalSampling dclassicl{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, 2, true };
+		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, -1.0, 1 , false };
+		DClassicalSampling dclassicl{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, 1 , false };
 		auto sum = 0.0;
 		auto sum_clas = 0.0;
 		for (auto i = 0; i < runs; i++)
