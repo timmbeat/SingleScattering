@@ -29,7 +29,6 @@ double DClassicalSampling::calculateLr()
 	{
 		return Lr;
 	}
-
 	auto const cos_theta = ClassicalSampling::sampleDirDistribution();
 	updatePosition(s1);
 	updateDirection(cos_theta);
@@ -42,6 +41,8 @@ void DClassicalSampling::reset()
 	position = position_org;
 	direction = direction_org;
 	Lr = 1.0;
+	dead = false;
+	scatterevent = 0;
 }
 
 void DClassicalSampling::updateDirection(double const cos_theta)
@@ -136,13 +137,11 @@ double DClassicalSampling::run()
 	while(!dead)
 	{
 		DClassicalSampling::calculateLr();
-		std::cout << "?????";
 	}
 	//for (auto i = 0; i < times; i++)
 	//{
 	//	calculateLr();
 	//}
-
 	DClassicalSampling::out();
 
 	return Lr / Runs();

@@ -104,8 +104,8 @@ int main()
 		std::cout << "RUN " << j << std::endl;
 		
 									//Position						Direction												  diameter delr runs wz    scattering events	Enforce scattering
-		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, -1.0, 1 , false };
-		DClassicalSampling dclassicl{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, 1 , false };
+		DDwivediSampling ddwivedi{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, -1.0, 10 , false };
+		DClassicalSampling dclassicl{ glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -1.0) , absorption, scattering, anisotropy, 1.0, 0.005, runs, 10 , false };
 		auto sum = 0.0;
 		auto sum_clas = 0.0;
 		for (auto i = 0; i < runs; i++)
